@@ -1,6 +1,8 @@
 package com.bhft.todo.post;
 
 import com.bhft.todo.BaseTest;
+import com.todo.requests.TodoRequest;
+import com.todo.specs.RequestSpec;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -124,14 +126,10 @@ public class PostTodosTests extends BaseTest {
     @Test
     public void testCreateTodoWithInvalidDataTypes() {
         // Поле 'completed' содержит строку вместо булевого значения
-        String invalidTodoJson = "{ \"id\": 4, \"text\": \"Invalid Data Type\", \"completed\": \"notBoolean\" }";
+        Todo newTodo = new Todo(3, "dfsdsfdsf", false);
+        TodoRequest todoRequest = new TodoRequest(RequestSpec.authSpec());
 
-        given()
-                .filter(new AllureRestAssured())
-                .contentType(ContentType.JSON)
-                .body(invalidTodoJson)
-                .when()
-                .post("/todos")
+        todoRequest.create(newTodo)
                 .then()
                 .statusCode(400)
                 .contentType(ContentType.TEXT)
