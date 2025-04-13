@@ -1,14 +1,12 @@
 package com.todo.requests;
 
 import com.todo.models.Todo;
-import io.qameta.allure.restassured.AllureRestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
 import static io.restassured.RestAssured.given;
 
-public class TodoRequest extends Request implements CrudInterface<Todo>{
+public class TodoRequest extends Request implements CrudInterface<Todo>, SearchInterface<Todo> {
 
     private static final String TODO_ENDPOINT = "/todos";
 
@@ -26,12 +24,53 @@ public class TodoRequest extends Request implements CrudInterface<Todo>{
     }
 
     @Override
-    public Object update(long id, Todo entity) {
-        return null;
+    public Response update(long id, Todo entity) {
+        return given()
+                .spec(reqSpec)
+                .body(entity)
+                .when()
+                .put(TODO_ENDPOINT + "/" + id);
     }
 
     @Override
-    public Object delete(long id) {
-        return null;
+    public Response delete(long id) {
+        return given()
+                .spec(reqSpec)
+                .when()
+                .delete(TODO_ENDPOINT + "/" + id);
+    }
+
+    public Response getAll() {
+        return given()
+                .spec(reqSpec)
+                .when()
+                .get(TODO_ENDPOINT);
+    }
+
+    @Override
+    public Response readAll() {
+        return given()
+                .spec(reqSpec)
+                .when()
+                .get(TODO_ENDPOINT);
+    }
+
+    @Override
+    public Response readAll(int offset, int limit) {
+        return given()
+                .spec(reqSpec)
+                .queryParam("offset", offset)
+                .queryParam("limit", limit)
+                .when()
+                .get(TODO_ENDPOINT);
+    }
+
+
+    public Response readAll(int limit) {
+        return given()
+                .spec(reqSpec)
+                .queryParam("limit", limit)
+                .when()
+                .get(TODO_ENDPOINT);
     }
 }

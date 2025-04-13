@@ -1,7 +1,6 @@
 package com.todo.specs;
 
 import io.qameta.allure.restassured.AllureRestAssured;
-import io.restassured.authentication.BasicAuthScheme;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
@@ -10,8 +9,9 @@ import io.restassured.specification.RequestSpecification;
 
 import java.util.List;
 
+import static io.restassured.RestAssured.preemptive;
+
 public class RequestSpec {
-    private RequestSpecBuilder requestSpecBuilder;
 
     private static RequestSpecBuilder baseSpecBuilder() {
         RequestSpecBuilder requestSpecBuilder = new RequestSpecBuilder();
@@ -24,16 +24,23 @@ public class RequestSpec {
         return requestSpecBuilder;
     }
 
-    public static RequestSpecification unauthSpec(){
+    public static RequestSpecification unauthSpec() {
         return baseSpecBuilder().build();
     }
 
-    public static RequestSpecification authSpec(){
-        BasicAuthScheme basicAuthScheme = new BasicAuthScheme();
-        basicAuthScheme.setUserName("admin");
-        basicAuthScheme.setPassword("admin");
-        baseSpecBuilder().setAuth(basicAuthScheme);
-        return baseSpecBuilder().build();
+    public static RequestSpecification authSpec() {
+        RequestSpecBuilder builder = baseSpecBuilder();
+
+        builder.setAuth(preemptive().basic("admin", "admin"));
+
+        return builder.build();
     }
 
+    public static RequestSpecification authSpecInvalidUsernameAndPassword() {
+        RequestSpecBuilder builder = baseSpecBuilder();
+
+        builder.setAuth(preemptive().basic("invalidUser", "invalidPass"));
+
+        return builder.build();
+    }
 }
