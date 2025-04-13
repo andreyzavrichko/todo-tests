@@ -38,4 +38,10 @@ public class Todo {
         this.text = text;
         this.completed = completed;
     }
+
+    public Todo(long id, boolean completed) {
+        this.id = id;
+        this.completed = completed;
+    }
+
 }
