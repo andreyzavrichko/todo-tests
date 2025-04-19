@@ -17,6 +17,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static com.todo.generators.TestDataGenerator.generateTestData;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 
@@ -42,7 +43,10 @@ public class GetTodosTests extends BaseTest {
     public void testGetTodosWithExistingEntries() {
         ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
         // Предварительно создать несколько TODO
-        Todo todo1 = new Todo(1, "Task 1", false);
+        Todo todo1 = generateTestData(Todo.class);
+
+        todo1.setText("arabic symbols");
+
         Todo todo2 = new Todo(2, "Task 2", true);
 
         createTodo(todo1);
