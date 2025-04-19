@@ -1,6 +1,7 @@
 package com.todo.requests;
 
 import com.todo.models.Todo;
+import com.todo.storages.TestDataStorage;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
@@ -17,12 +18,13 @@ public class ValidatedTodoRequest {
         this.todoRequest = new TodoRequest(reqSpec);
     }
 
-    public void create(Todo entity) {
-        Response response = todoRequest.create(entity);
-
-        response.then()
+    public String create(Todo entity) {
+        var response = todoRequest.create(entity)
+        .then()
                 .statusCode(SC_CREATED)
                 .extract().asString();
+        TestDataStorage.getInstance().addData(entity);
+        return response;
     }
 
 

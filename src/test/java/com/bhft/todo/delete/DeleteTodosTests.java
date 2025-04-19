@@ -3,7 +3,7 @@ package com.bhft.todo.delete;
 import com.bhft.todo.BaseTest;
 import com.todo.models.Todo;
 import com.todo.requests.ValidatedTodoRequest;
-import com.todo.specs.RequestSpec;
+import com.todo.specs.request.RequestSpec;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

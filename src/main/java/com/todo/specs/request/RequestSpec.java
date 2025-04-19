@@ -1,4 +1,4 @@
-package com.todo.specs;
+package com.todo.specs.request;
 
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.builder.RequestSpecBuilder;

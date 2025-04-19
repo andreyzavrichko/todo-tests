@@ -1,5 +1,7 @@
 package com.todo.requests;
 
+import com.todo.interfaces.CrudInterface;
+import com.todo.interfaces.SearchInterface;
 import com.todo.models.Todo;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;

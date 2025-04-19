@@ -2,9 +2,10 @@ package com.bhft.todo.post;
 
 import com.bhft.todo.BaseTest;
 import com.todo.models.Todo;
-import com.todo.requests.TodoRequest;
+import com.todo.models.TodoBuilder;
 import com.todo.requests.ValidatedTodoRequest;
-import com.todo.specs.RequestSpec;
+import com.todo.specs.request.RequestSpec;
+import com.todo.specs.response.IncorrectDataResponse;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,10 +26,10 @@ public class PostTodosTests extends BaseTest {
         Todo newTodo = new Todo(1, "New Task", false);
 
         // Создаём TODO и получаем его обратно
-        validatedRequest.create(newTodo);
+        todoRequester.getValidatedRequest().create(newTodo);
 
         // Получаем список и убеждаемся, что созданный TODO присутствует
-        Todo[] todos = validatedRequest.getAll();
+        Todo[] todos = todoRequester.getValidatedRequest().getAll();
         boolean found = false;
         for (Todo todo : todos) {
             if (todo.getId() == newTodo.getId()) {
@@ -65,10 +66,11 @@ public class PostTodosTests extends BaseTest {
         Todo newTodo = new Todo(3, maxLengthText, false);
 
         // Отправляем POST запрос для создания нового TODO
-        validatedRequest.create(newTodo);
+        todoRequester.getValidatedRequest()
+                .create(newTodo);
 
         // Проверяем, что TODO было успешно создано
-        Todo[] todos = validatedRequest.getAll();
+        Todo[] todos = todoRequester.getValidatedRequest().getAll();
 
         // Ищем созданную задачу в списке
         boolean found = false;
@@ -89,10 +91,11 @@ public class PostTodosTests extends BaseTest {
     @Test
     public void testCreateTodoWithInvalidDataTypes() {
         // Поле 'completed' содержит строку вместо булевого значения
-        Todo newTodo = new Todo(3, "dfsdsfdsf", false);
-        TodoRequest todoRequest = new TodoRequest(RequestSpec.authSpec());
+        // Todo newTodo = new Todo(3, "dfsdsfdsf", false);
+        Todo newTodo = new TodoBuilder().setText("dsfsfsdfdsf").build();
 
-        todoRequest.create(newTodo)
+        todoRequester.getRequest()
+                .create(newTodo)
                 .then()
                 .statusCode(400)
                 .contentType(ContentType.TEXT)
@@ -110,7 +113,13 @@ public class PostTodosTests extends BaseTest {
         createTodo(firstTodo);
         // Пытаемся создать другую TODO с тем же id
         Todo duplicateTodo = new Todo(5, "Duplicate Task", true);
-        validatedRequest.createAndReturnDuplicate(duplicateTodo);
+
+
+        todoRequester.getRequest()
+                .create(duplicateTodo)
+                .then()
+                .spec(new IncorrectDataResponse().sameId());
+
     }
 
 }

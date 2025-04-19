@@ -1,4 +1,4 @@
-package com.todo.requests;
+package com.todo.interfaces;
 
 import io.restassured.response.Response;
 

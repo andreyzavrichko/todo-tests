@@ -2,9 +2,11 @@ package com.bhft.todo.get;
 
 
 import com.bhft.todo.BaseTest;
+import com.todo.annotations.DataPreparationExtension;
+import com.todo.annotations.PrepareTodo;
 import com.todo.models.Todo;
 import com.todo.requests.ValidatedTodoRequest;
-import com.todo.specs.RequestSpec;
+import com.todo.specs.request.RequestSpec;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
@@ -13,12 +15,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.containsString;
 
 @Epic("TODO Management")
 @Feature("Get Todos API")
+@ExtendWith(DataPreparationExtension.class)
 public class GetTodosTests extends BaseTest {
 
     @BeforeEach
@@ -57,6 +61,7 @@ public class GetTodosTests extends BaseTest {
     }
 
     @Test
+    @PrepareTodo(5)
     @Description("Использование параметров offset и limit для пагинации")
     public void testGetTodosWithOffsetAndLimit() {
         ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());

@@ -1,16 +1,27 @@
 package com.bhft.todo;
 
+import com.todo.interfaces.TodoRequester;
+import com.todo.specs.request.RequestSpec;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import com.todo.models.Todo;
+import org.junit.jupiter.api.BeforeEach;
 
 import static io.restassured.RestAssured.given;
 
 public class BaseTest {
+   protected TodoRequester todoRequester;
+
+
     @BeforeAll
     public static void setup() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = 8080;
+    }
+
+    @BeforeEach
+    public void setupTest(){
+        todoRequester = new TodoRequester(RequestSpec.authSpec());
     }
 
     protected void createTodo(Todo todo) {

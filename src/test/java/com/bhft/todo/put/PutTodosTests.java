@@ -3,7 +3,7 @@ package com.bhft.todo.put;
 import com.bhft.todo.BaseTest;
 import com.todo.models.Todo;
 import com.todo.requests.ValidatedTodoRequest;
-import com.todo.specs.RequestSpec;
+import com.todo.specs.request.RequestSpec;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Assertions;

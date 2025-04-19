@@ -1,4 +1,4 @@
-package com.todo.requests;
+package com.todo.interfaces;
 
 public interface CrudInterface<T> {
     Object create(T entity);
