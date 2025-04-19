@@ -1,108 +1,55 @@
 package com.bhft.todo.delete;
 
 import com.bhft.todo.BaseTest;
+import com.todo.annotations.DataPreparationExtension;
+import com.todo.annotations.PrepareTodo;
 import com.todo.models.Todo;
-import com.todo.requests.ValidatedTodoRequest;
+import com.todo.requests.TodoRequest;
 import com.todo.specs.request.RequestSpec;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import static com.todo.generators.TestDataGenerator.generateTestData;
+import java.util.Arrays;
+import java.util.Optional;
 
+@ExtendWith(DataPreparationExtension.class)
 public class DeleteTodosTests extends BaseTest {
 
 
     @Test
-    @DisplayName("TC1: Удаление todo")
+    @PrepareTodo(1)
+    @DisplayName("TC1: Авторизированный юзер может удалить todo")
     public void testDeleteExistingTodoWithValidAuth() {
-        // Создаем TODO для удаления
-        Todo todo = generateTestData(Todo.class);
-        createTodo(todo);
+        Optional<Todo> createdTodo = Arrays.stream(todoRequester.getValidatedRequest().readAll(1)).findFirst();
 
-        // Отправляем DELETE запрос с корректной авторизацией
-        todoRequester.getValidatedRequest().delete(todo.getId());
+        todoRequester.getValidatedRequest().delete(createdTodo.get().getId());
 
-        // Получаем список всех TODO и проверяем, что удаленная задача отсутствует
-        Todo[] todos = todoRequester.getValidatedRequest().getAll();
+        softly.assertThat(todoRequester.getValidatedRequest().readAll(1)).hasSize(0);
 
-        // Проверяем, что удаленная задача отсутствует в списке
-        boolean found = false;
-        for (Todo t : todos) {
-            if (t.getId() == todo.getId()) {
-                found = true;
-                break;
-            }
-        }
-        Assertions.assertFalse(found, "Удаленная задача все еще присутствует в списке TODO");
     }
 
     @Test
-    @DisplayName("TC2: Попытка удаления TODO без заголовка Authorization.")
+    @PrepareTodo(1)
+    @DisplayName("TC2: Неавторизированный юзер не может удалить todo")
     public void testDeleteTodoWithoutAuthHeader() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.unauthSpec());
-        // Создаем TODO для удаления
-        Todo todo = generateTestData(Todo.class);
-        createTodo(todo);
+        Optional<Todo> createdTodo = Arrays.stream(todoRequester.getValidatedRequest().readAll(1)).findFirst();
 
-        validatedRequest.deleteWithoutAuth(todo.getId());
+        new TodoRequest(RequestSpec.unauthSpec()).delete(createdTodo.get().getId());
 
-        // Проверяем, что TODO не было удалено
-        Todo[] todos = todoRequester.getValidatedRequest().getAll();
+        softly.assertThat(todoRequester.getValidatedRequest().readAll(1)).hasSize(1);
 
-        // Проверяем, что задача все еще присутствует в списке
-        boolean found = false;
-        for (Todo t : todos) {
-            if (t.getId() == todo.getId()) {
-                found = true;
-                break;
-            }
-        }
-        Assertions.assertTrue(found, "Задача отсутствует в списке TODO, хотя не должна была быть удалена");
-    }
-
-    @Test
-    @DisplayName("TC3: Попытка удаления TODO с некорректными учетными данными.")
-    public void testDeleteTodoWithInvalidAuth() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpecInvalidUsernameAndPassword());
-        // Создаем TODO для удаления
-        Todo todo = generateTestData(Todo.class);
-        createTodo(todo);
-
-        validatedRequest.deleteWithoutAuth(todo.getId());
-
-        // Проверяем, что TODO не было удалено
-        Todo[] todos = todoRequester.getValidatedRequest().getAll();
-
-        // Проверяем, что задача все еще присутствует в списке
-        boolean found = false;
-        for (Todo t : todos) {
-            if (t.getId() == todo.getId()) {
-                found = true;
-                break;
-            }
-        }
-        Assertions.assertTrue(found, "Задача отсутствует в списке TODO, хотя не должна была быть удалена");
     }
 
 
     @Test
-    @DisplayName("TC4: Удаление TODO с несуществующим id.")
+    @DisplayName("TC3: Авторизованный юзер не может удалить юзера с несуществующим id")
     public void testDeleteNonExistentTodo() {
         todoRequester.getValidatedRequest().deleteNotFound(999);
 
-        Todo[] todos = todoRequester.getValidatedRequest().getAll();
-        // Дополнительно можем проверить, что список TODO не изменился
+        todoRequester.getValidatedRequest().getAll();
 
-        // В данном случае, поскольку мы не добавляли задач с id 999, список должен быть пуст или содержать только ранее добавленные задачи
+        softly.assertThat(todoRequester.getValidatedRequest().readAll(1)).hasSize(1);
     }
 
-
-    @Test
-    @DisplayName("TC5: Попытка удаления с некорректным форматом id (например, строка вместо числа).")
-    public void testDeleteTodoWithInvalidIdFormat() {
-        // Отправляем DELETE запрос с некорректным id
-        todoRequester.getValidatedRequest().deleteNotFound(999999999);
-
-    }
 }

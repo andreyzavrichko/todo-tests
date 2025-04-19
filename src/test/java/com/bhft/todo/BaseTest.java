@@ -27,7 +27,7 @@ public class BaseTest {
 
     @BeforeEach
     public void setupTest() {
-        deleteAllTodos();
+       // deleteAllTodos();
         todoRequester = new TodoRequester(RequestSpec.authSpec());
         softly = new SoftAssertions();
 

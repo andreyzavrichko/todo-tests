@@ -13,4 +13,14 @@ public class IncorrectDataResponse {
         responseSpecBuilder.expectBody(Matchers.containsString("You are trying to use the same id"));
         return responseSpecBuilder.build();
     }
+
+    public static ResponseSpecification offsetOtLimitHaveIncorrectValues() {
+        ResponseSpecBuilder responseSpecBuilder = new ResponseSpecBuilder();
+        responseSpecBuilder.expectStatusCode(SC_BAD_REQUEST);
+        responseSpecBuilder.expectBody(Matchers.containsString("Offset or limit incorrect"));
+        return responseSpecBuilder.build();
+    }
+
+
+
 }
