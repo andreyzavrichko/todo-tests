@@ -22,7 +22,7 @@ public class DataPreparationExtension implements BeforeEachCallback {
                 new TodoRequest(RequestSpec.authSpec())
                         .create(
                                 new TodoBuilder()
-                                        .setId(Long.valueOf(randomNumeric(3)))
+                                        .setId(Long.parseLong(randomNumeric(3)))
                                         .setText("123").build());
 
             }

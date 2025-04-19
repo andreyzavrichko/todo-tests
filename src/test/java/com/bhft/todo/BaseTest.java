@@ -1,26 +1,28 @@
 package com.bhft.todo;
 
+import com.todo.config.ConfigManager;
 import com.todo.interfaces.TodoRequester;
+import com.todo.models.Todo;
 import com.todo.specs.request.RequestSpec;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
-import com.todo.models.Todo;
 import org.junit.jupiter.api.BeforeEach;
 
 import static io.restassured.RestAssured.given;
 
 public class BaseTest {
-   protected TodoRequester todoRequester;
+    protected TodoRequester todoRequester;
 
 
     @BeforeAll
     public static void setup() {
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = 8080;
+        ConfigManager config = ConfigManager.getInstance();
+        RestAssured.baseURI = config.get("baseUrl");
+        RestAssured.port = config.getInt("port");
     }
 
     @BeforeEach
-    public void setupTest(){
+    public void setupTest() {
         todoRequester = new TodoRequester(RequestSpec.authSpec());
     }
 
@@ -48,7 +50,9 @@ public class BaseTest {
             given()
                     .auth()
                     .preemptive()
-                    .basic("admin", "admin")
+                    .basic(
+                            ConfigManager.getInstance().get("username"),
+                            ConfigManager.getInstance().get("password"))
                     .when()
                     .delete("/todos/" + todo.getId())
                     .then()
