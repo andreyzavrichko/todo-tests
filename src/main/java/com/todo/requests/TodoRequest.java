@@ -3,6 +3,7 @@ package com.todo.requests;
 import com.todo.interfaces.CrudInterface;
 import com.todo.interfaces.SearchInterface;
 import com.todo.models.Todo;
+import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
@@ -17,6 +18,7 @@ public class TodoRequest extends Request implements CrudInterface<Todo>, SearchI
     }
 
     @Override
+    @Step("Create {entity}")
     public Response create(Todo entity) {
         return given()
                 .spec(reqSpec)
@@ -26,6 +28,7 @@ public class TodoRequest extends Request implements CrudInterface<Todo>, SearchI
     }
 
     @Override
+    @Step("Update {entity}")
     public Response update(long id, Todo entity) {
         return given()
                 .spec(reqSpec)
@@ -35,6 +38,7 @@ public class TodoRequest extends Request implements CrudInterface<Todo>, SearchI
     }
 
     @Override
+    @Step("Delete {id}")
     public Response delete(long id) {
         return given()
                 .spec(reqSpec)
@@ -42,6 +46,7 @@ public class TodoRequest extends Request implements CrudInterface<Todo>, SearchI
                 .delete(TODO_ENDPOINT + "/" + id);
     }
 
+    @Step("Get all todos")
     public Response getAll() {
         return given()
                 .spec(reqSpec)
@@ -50,6 +55,7 @@ public class TodoRequest extends Request implements CrudInterface<Todo>, SearchI
     }
 
     @Override
+    @Step("Get all todos")
     public Response readAll() {
         return given()
                 .spec(reqSpec)
@@ -58,6 +64,7 @@ public class TodoRequest extends Request implements CrudInterface<Todo>, SearchI
     }
 
     @Override
+    @Step("Get all todos with {offset} and {limit}")
     public Response readAll(int offset, int limit) {
         return given()
                 .spec(reqSpec)
@@ -67,7 +74,7 @@ public class TodoRequest extends Request implements CrudInterface<Todo>, SearchI
                 .get(TODO_ENDPOINT);
     }
 
-
+    @Step("Get all todos with {limit}")
     public Response readAll(int limit) {
         return given()
                 .spec(reqSpec)

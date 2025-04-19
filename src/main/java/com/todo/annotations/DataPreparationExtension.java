@@ -1,12 +1,12 @@
 package com.todo.annotations;
 
-import com.todo.models.TodoBuilder;
+import com.todo.models.Todo;
 import com.todo.requests.TodoRequest;
 import com.todo.specs.request.RequestSpec;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static com.todo.generators.TestDataGenerator.generateTestData;
 
 public class DataPreparationExtension implements BeforeEachCallback {
 
@@ -20,11 +20,7 @@ public class DataPreparationExtension implements BeforeEachCallback {
         if (prepareTodo != null) {
             for (int i = 0; i < prepareTodo.value(); i++) {
                 new TodoRequest(RequestSpec.authSpec())
-                        .create(
-                                new TodoBuilder()
-                                        .setId(Long.parseLong(randomNumeric(3)))
-                                        .setText("123").build());
-
+                        .create(generateTestData(Todo.class));
             }
         }
     }
