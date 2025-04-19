@@ -5,14 +5,10 @@ import com.bhft.todo.BaseTest;
 import com.todo.annotations.DataPreparationExtension;
 import com.todo.annotations.PrepareTodo;
 import com.todo.models.Todo;
-import com.todo.requests.ValidatedTodoRequest;
-import com.todo.specs.request.RequestSpec;
-import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.restassured.AllureRestAssured;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,70 +22,60 @@ import static org.hamcrest.Matchers.containsString;
 @ExtendWith(DataPreparationExtension.class)
 public class GetTodosTests extends BaseTest {
 
-    @BeforeEach
-    public void setupEach() {
-        deleteAllTodos();
-    }
-
     @Test
-    @Description("Получение пустого списка TODO, когда база данных пуста")
+    @DisplayName("Получение пустого списка TODO, когда база данных пуста")
     public void testGetTodosWhenDatabaseIsEmpty() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
-        validatedRequest.getAllEmpty();
+        todoRequester.getValidatedRequest().getAllEmpty();
     }
 
     @Test
-    @Description("Получение списка TODO с существующими записями")
+    @DisplayName("Получение списка TODO с существующими записями")
     public void testGetTodosWithExistingEntries() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
         // Предварительно создать несколько TODO
         Todo todo1 = generateTestData(Todo.class);
-
-        todo1.setText("arabic symbols");
-
-        Todo todo2 = new Todo(2, "Task 2", true);
+        Todo todo2 = generateTestData(Todo.class);
 
         createTodo(todo1);
         createTodo(todo2);
 
-        Todo[] todos = validatedRequest.getAll();
+        Todo[] todos = todoRequester.getValidatedRequest().getAll();
 
-        // Дополнительная проверка содержимого
-        Assertions.assertEquals(1, todos[0].getId());
-        Assertions.assertEquals("Task 1", todos[0].getText());
-        Assertions.assertFalse(todos[0].isCompleted());
+        softly.assertThat(todos[0].getId()).isEqualTo(todo1.getId());
+        softly.assertThat(todos[0].getText()).isEqualTo(todo1.getText());
+        softly.assertThat(todos[0].isCompleted()).isFalse();
 
-        Assertions.assertEquals(2, todos[1].getId());
-        Assertions.assertEquals("Task 2", todos[1].getText());
-        Assertions.assertTrue(todos[1].isCompleted());
+        softly.assertThat(todos[1].getId()).isEqualTo(todo2.getId());
+        softly.assertThat(todos[1].getText()).isEqualTo(todo2.getText());
+        softly.assertThat(todos[1].isCompleted()).isFalse();
+
     }
 
     @Test
     @PrepareTodo(5)
-    @Description("Использование параметров offset и limit для пагинации")
+    @DisplayName("Использование параметров offset и limit для пагинации")
     public void testGetTodosWithOffsetAndLimit() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
         // Создаем 5 TODO
         for (int i = 1; i <= 5; i++) {
             createTodo(new Todo(i, "Task " + i, i % 2 == 0));
         }
-        Todo[] todos = validatedRequest.readAll(2, 2);
+        Todo[] todos = todoRequester.getValidatedRequest().readAll(2, 2);
 
         // Проверяем, что получили задачи с id 3 и 4
 
-        Assertions.assertEquals(3, todos[0].getId());
-        Assertions.assertEquals("Task 3", todos[0].getText());
+        // Проверяем, что получили задачи с id 3 и 4
+        softly.assertThat(todos[0].getId()).isEqualTo(3);
+        softly.assertThat(todos[0].getText()).isEqualTo("Task 3");
 
-        Assertions.assertEquals(4, todos[1].getId());
-        Assertions.assertEquals("Task 4", todos[1].getText());
+        softly.assertThat(todos[1].getId()).isEqualTo(4);
+        softly.assertThat(todos[1].getText()).isEqualTo("Task 4");
+
     }
 
     @Test
     @DisplayName("Передача некорректных значений в offset и limit")
     public void testGetTodosWithInvalidOffsetAndLimit() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
         // Тест с отрицательным offset
-        validatedRequest.readAllBadRequest(-1, 2);
+        todoRequester.getValidatedRequest().readAllBadRequest(-1, 2);
 
         // Тест с нечисловым limit
         given()
@@ -117,14 +103,11 @@ public class GetTodosTests extends BaseTest {
     }
 
     @Test
+    @PrepareTodo(10)
     @DisplayName("Проверка ответа при превышении максимально допустимого значения limit")
     public void testGetTodosWithExcessiveLimit() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
-        // Создаем 10 TODO
-        for (int i = 1; i <= 10; i++) {
-            createTodo(new Todo(i, "Task " + i, i % 2 == 0));
-        }
-        Todo[] todos = validatedRequest.readAll(1000);
+        // Читаем с limit больше количества задач
+        Todo[] todos = todoRequester.getValidatedRequest().readAll(1000);
 
         // Проверяем, что вернулось 10 задач
         Assertions.assertEquals(10, todos.length);

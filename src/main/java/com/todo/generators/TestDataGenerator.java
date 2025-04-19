@@ -3,6 +3,8 @@ package com.todo.generators;
 import io.qameta.allure.Step;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class TestDataGenerator {
@@ -43,5 +45,14 @@ public class TestDataGenerator {
             builder.append(characters.charAt(RANDOM.nextInt(characters.length())));
         }
         return builder.toString();
+    }
+
+    @Step("Generate {count} instances of {clazz}")
+    public static <T> List<T> generateTestData(Class<T> clazz, int count) {
+        List<T> list = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            list.add(generateTestData(clazz));
+        }
+        return list;
     }
 }

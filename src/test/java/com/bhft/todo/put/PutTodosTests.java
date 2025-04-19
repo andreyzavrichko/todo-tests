@@ -6,61 +6,51 @@ import com.todo.requests.ValidatedTodoRequest;
 import com.todo.specs.request.RequestSpec;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.todo.generators.TestDataGenerator.generateTestData;
 import static io.restassured.RestAssured.given;
 
 public class PutTodosTests extends BaseTest {
 
-    @BeforeEach
-    public void setupEach() {
-        deleteAllTodos();
-    }
 
-    /**
-     * TC1: Обновление существующего TODO корректными данными.
-     */
     @Test
+    @DisplayName("TC1: Обновление существующего TODO корректными данными.")
     public void testUpdateExistingTodoWithValidData() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
         // Создаем TODO для обновления
-        Todo originalTodo = new Todo(1, "Original Task", false);
+        Todo originalTodo = generateTestData(Todo.class);
         createTodo(originalTodo);
 
         // Обновленные данные
-        Todo updatedTodo = new Todo(1, "Updated Task", true);
+        Todo updatedTodo = new Todo(originalTodo.getId(), "Updated Task", true);
 
         // Отправляем PUT запрос для обновления
-        validatedRequest.update(updatedTodo.getId(), updatedTodo);
+        todoRequester.getValidatedRequest().update(updatedTodo.getId(), updatedTodo);
 
         // Проверяем, что данные были обновлены
-        Todo[] todos = validatedRequest.getAll();
+        Todo[] todos = todoRequester.getValidatedRequest().getAll();
 
-        Assertions.assertEquals(1, todos.length);
-        Assertions.assertEquals("Updated Task", todos[0].getText());
-        Assertions.assertTrue(todos[0].isCompleted());
+        softly.assertThat(todos.length).isEqualTo(1);
+        softly.assertThat(todos[0].getText()).isEqualTo("Updated Task");
+        softly.assertThat(todos[0].isCompleted()).isTrue();
+
     }
 
-    /**
-     * TC2: Попытка обновления TODO с несуществующим id.
-     */
+
     @Test
+    @DisplayName("TC2: Попытка обновления TODO с несуществующим id.")
     public void testUpdateNonExistentTodo() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
         // Обновленные данные для несуществующего TODO
-        Todo updatedTodo = new Todo(999, "Non-existent Task", true);
+        Todo updatedTodo = generateTestData(Todo.class);
 
-        validatedRequest.deleteNotFound(updatedTodo.getId());
+        todoRequester.getValidatedRequest().deleteNotFound(updatedTodo.getId());
     }
 
-    /**
-     * TC3: Обновление TODO с отсутствием обязательных полей.
-     */
+
     @Test
+    @DisplayName("TC3: Обновление TODO с отсутствием обязательных полей.")
     public void testUpdateTodoWithMissingFields() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
         // Создаем TODO для обновления
         Todo originalTodo = new Todo(2, "Task to Update", false);
         createTodo(originalTodo);
@@ -68,17 +58,16 @@ public class PutTodosTests extends BaseTest {
         // Обновленные данные с отсутствующим полем 'text'
         Todo invalidTodoJson = new Todo(2, true);
 
-        validatedRequest.updateBadRequest(2, invalidTodoJson);
+        todoRequester.getValidatedRequest().updateBadRequest(2, invalidTodoJson);
 
     }
 
-    /**
-     * TC4: Передача некорректных типов данных при обновлении.
-     */
+
     @Test
+    @DisplayName("TC4: Передача некорректных типов данных при обновлении.")
     public void testUpdateTodoWithInvalidDataTypes() {
         // Создаем TODO для обновления
-        Todo originalTodo = new Todo(3, "Another Task", false);
+        Todo originalTodo = generateTestData(Todo.class);
         createTodo(originalTodo);
 
         // Обновленные данные с некорректным типом поля 'completed'
@@ -94,21 +83,19 @@ public class PutTodosTests extends BaseTest {
                 .statusCode(401);
     }
 
-    /**
-     * TC5: Обновление TODO без изменения данных (передача тех же значений).
-     */
-    @Test
-    public void testUpdateTodoWithoutChangingData() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
-        // Создаем TODO для обновления
-        Todo originalTodo = new Todo(4, "Task without Changes", false);
-        createTodo(originalTodo);
-        validatedRequest.update(4, originalTodo);
 
-        Todo[] todo = validatedRequest.getAll();
+    @Test
+    @DisplayName("TC5: Обновление TODO без изменения данных (передача тех же значений).")
+    public void testUpdateTodoWithoutChangingData() {
+        // Создаем TODO для обновления
+        Todo originalTodo = generateTestData(Todo.class);
+        createTodo(originalTodo);
+        todoRequester.getValidatedRequest().update(originalTodo.getId(), originalTodo);
+
+        Todo[] todo = todoRequester.getValidatedRequest().getAll();
         // Проверяем, что данные не изменились
 
-        Assertions.assertEquals("Task without Changes", todo[0].getText());
-        Assertions.assertFalse(todo[0].isCompleted());
+        softly.assertThat(todo[0].getText()).isEqualTo(originalTodo.getText());
+        softly.assertThat(todo[0].isCompleted()).isFalse();
     }
 }

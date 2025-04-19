@@ -8,22 +8,19 @@ import com.todo.specs.request.RequestSpec;
 import com.todo.specs.response.IncorrectDataResponse;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static com.todo.generators.TestDataGenerator.generateTestData;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class PostTodosTests extends BaseTest {
 
-    @BeforeEach
-    public void setupEach() {
-        deleteAllTodos();
-    }
 
     @Test
+    @DisplayName("TC1: Создание TODO с валидными данными")
     public void testCreateTodoWithValidData() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
-        Todo newTodo = new Todo(1, "New Task", false);
+        Todo newTodo = generateTestData(Todo.class);
 
         // Создаём TODO и получаем его обратно
         todoRequester.getValidatedRequest().create(newTodo);
@@ -42,25 +39,21 @@ public class PostTodosTests extends BaseTest {
         Assertions.assertTrue(found, "Созданная задача не найдена в списке TODO");
     }
 
-    /**
-     * TC2: Попытка создания TODO с отсутствующими обязательными полями.
-     */
+
     @Test
+    @DisplayName("TC2: Попытка создания TODO с отсутствующими обязательными полями.")
     public void testCreateTodoWithMissingFields() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
         // Создаем JSON без обязательного поля 'text'
         Todo invalidTodoJson = new Todo(2, true);
-
-        validatedRequest.createAndReturnBadRequest(invalidTodoJson);
+        todoRequester.getValidatedRequest()
+                .createAndReturnBadRequest(invalidTodoJson);
 
     }
 
-    /**
-     * TC3: Создание TODO с максимально допустимой длиной поля 'text'.
-     */
+
     @Test
+    @DisplayName("TC3: Создание TODO с максимально допустимой длиной поля 'text'.")
     public void testCreateTodoWithMaxLengthText() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
         // Предполагаем, что максимальная длина поля 'text' составляет 255 символов
         String maxLengthText = "A".repeat(255);
         Todo newTodo = new Todo(3, maxLengthText, false);
@@ -85,13 +78,12 @@ public class PostTodosTests extends BaseTest {
         Assertions.assertTrue(found, "Созданная задача не найдена в списке TODO");
     }
 
-    /**
-     * TC4: Передача некорректных типов данных в полях.
-     */
+
     @Test
+    @DisplayName("TC4: Передача некорректных типов данных в полях.")
+
     public void testCreateTodoWithInvalidDataTypes() {
         // Поле 'completed' содержит строку вместо булевого значения
-        // Todo newTodo = new Todo(3, "dfsdsfdsf", false);
         Todo newTodo = new TodoBuilder().setText("dsfsfsdfdsf").build();
 
         todoRequester.getRequest()
@@ -102,18 +94,14 @@ public class PostTodosTests extends BaseTest {
                 .body(notNullValue()); // Проверяем, что есть сообщение об ошибке
     }
 
-    /**
-     * TC5: Создание TODO с уже существующим 'id' (если 'id' задается клиентом).
-     */
+
     @Test
+    @DisplayName("TC5: Создание TODO с уже существующим 'id' (если 'id' задается клиентом).")
     public void testCreateTodoWithExistingId() {
-        ValidatedTodoRequest validatedRequest = new ValidatedTodoRequest(RequestSpec.authSpec());
-        // Сначала создаем TODO с id = 5
-        Todo firstTodo = new Todo(5, "First Task", false);
+        Todo firstTodo = generateTestData(Todo.class);
         createTodo(firstTodo);
         // Пытаемся создать другую TODO с тем же id
-        Todo duplicateTodo = new Todo(5, "Duplicate Task", true);
-
+        Todo duplicateTodo = new Todo(firstTodo.getId(), "Duplicate Task", true);
 
         todoRequester.getRequest()
                 .create(duplicateTodo)
